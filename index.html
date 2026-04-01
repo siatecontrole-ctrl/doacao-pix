@@ -7,7 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; overflow-x: hidden; }
+        .toast-animation { animation: slideUp 0.3s ease-out forwards; }
+        @keyframes slideUp { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -26,7 +28,7 @@
         </div>
 
         <div class="relative mb-6">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">R$</span>
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">R$</span>
             <input type="number" id="valorInput" oninput="validarRegras()" placeholder="0,00" 
                 class="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-extrabold focus:border-blue-500 focus:bg-white outline-none transition-all">
         </div>
@@ -51,8 +53,12 @@
     <div id="telaSucesso" class="hidden bg-white p-12 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border border-green-100">
         <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner">✓</div>
         <h2 class="text-3xl font-black text-gray-800 mb-4">Recebido!</h2>
-        <p class="text-gray-500 mb-8 leading-relaxed">Sua doação foi confirmada com sucesso.</p>
+        <p class="text-gray-500 mb-8 leading-relaxed">Sua doação foi confirmada com sucesso. Muito obrigado!</p>
         <button onclick="location.reload()" class="bg-gray-100 text-gray-500 px-8 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Voltar</button>
+    </div>
+
+    <div id="toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-8 py-4 rounded-2xl text-sm font-bold shadow-2xl z-50 toast-animation flex items-center gap-3">
+        <span class="text-green-400 text-lg">✓</span> Código copiado com sucesso!
     </div>
 
     <script>
@@ -63,7 +69,6 @@
             validarRegras();
         }
 
-        // Bloqueia o botão se o valor for menor que 5
         function validarRegras() {
             const valor = parseFloat(document.getElementById('valorInput').value);
             const btn = document.getElementById('btnAcao');
@@ -82,23 +87,18 @@
         async function gerarPix() {
             const valor = document.getElementById('valorInput').value;
             const btn = document.getElementById('btnAcao');
-            
             btn.innerText = "PROCESSANDO...";
             btn.disabled = true;
 
             try {
                 const res = await fetch(`/api/gerar-pix?valor=${valor}`);
                 const data = await res.json();
-
                 if (data.qrCopyPaste) {
                     window.pixCache = data.qrCopyPaste;
                     document.getElementById('qrImagem').src = data.qrCodeUrl;
                     document.getElementById('areaPix').classList.remove('hidden');
                     btn.classList.add('hidden');
                     monitorarPagamento(data.id);
-                } else {
-                    alert("Erro ao gerar. Verifique os dados.");
-                    validarRegras();
                 }
             } catch (e) {
                 alert("Erro de conexão.");
@@ -108,7 +108,9 @@
 
         function copiarPix() {
             navigator.clipboard.writeText(window.pixCache);
-            alert("Copiado! Agora cole no seu banco.");
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden');
+            setTimeout(() => { toast.classList.add('hidden'); }, 3000);
         }
 
         function monitorarPagamento(id) {
@@ -121,7 +123,7 @@
                         document.getElementById('cardPrincipal').classList.add('hidden');
                         document.getElementById('telaSucesso').classList.remove('hidden');
                     }
-                } catch (e) { console.log("Verificando..."); }
+                } catch (e) { console.log("Consultando..."); }
             }, 5000);
         }
     </script>
