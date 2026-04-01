@@ -7,7 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; overflow-x: hidden; }
+        /* Remove o Clippy forçadamente */
+        body img[src*="clippy"] { display: none !important; }
         .toast-animation { animation: slideUp 0.3s ease-out forwards; }
         @keyframes slideUp { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
     </style>
@@ -17,20 +19,20 @@
     <div id="cardPrincipal" class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md border border-gray-100 transition-all">
         
         <div class="mb-8 text-center">
-            <div class="w-12 h-1.5 bg-blue-600 mx-auto mb-4 rounded-full"></div>
+            <div class="w-12 h-1.5 bg-green-600 mx-auto mb-4 rounded-full"></div>
             <h1 class="text-2xl font-black text-gray-800 uppercase tracking-tight">Fazer Doação</h1>
-            <p class="text-gray-400 mt-2 text-sm">O valor mínimo é de <span class="font-bold text-blue-600">R$ 5,00</span></p>
+            <p class="text-gray-400 mt-2 text-sm">O valor mínimo é de <span class="font-bold text-green-700">R$ 5,00</span></p>
         </div>
 
         <div class="grid grid-cols-2 gap-3 mb-6">
-            <button onclick="setValor(10)" class="bg-blue-50 hover:bg-blue-100 py-4 rounded-2xl font-bold text-blue-700 transition-all border-2 border-transparent focus:border-blue-500">R$ 10</button>
-            <button onclick="setValor(50)" class="bg-blue-50 hover:bg-blue-100 py-4 rounded-2xl font-bold text-blue-700 transition-all border-2 border-transparent focus:border-blue-500">R$ 50</button>
+            <button onclick="setValor(10)" class="bg-green-50 hover:bg-green-100 py-4 rounded-2xl font-bold text-green-700 transition-all border-2 border-transparent focus:border-green-600">R$ 10</button>
+            <button onclick="setValor(50)" class="bg-green-50 hover:bg-green-100 py-4 rounded-2xl font-bold text-green-700 transition-all border-2 border-transparent focus:border-green-600">R$ 50</button>
         </div>
 
         <div class="relative mb-6">
             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">R$</span>
             <input type="number" id="valorInput" oninput="validarRegras()" placeholder="0,00" 
-                class="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-extrabold focus:border-blue-500 focus:bg-white outline-none transition-all">
+                class="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-extrabold focus:border-green-500 focus:bg-white outline-none transition-all">
         </div>
 
         <button onclick="gerarPix()" id="btnAcao" disabled 
@@ -38,14 +40,16 @@
             Informe o valor
         </button>
 
-        <div id="areaPix" class="hidden mt-8 text-center">
-            <div class="bg-blue-50 p-6 rounded-3xl border-2 border-dashed border-blue-200">
-                <p class="text-[10px] font-black text-blue-600 uppercase mb-4 tracking-widest">Código Gerado!</p>
+        <div id="areaPix" class="hidden mt-8 text-center animate-pulse">
+            <div class="bg-green-50 p-6 rounded-3xl border-2 border-dashed border-green-200">
+                <p class="text-[10px] font-black text-green-700 uppercase mb-4 tracking-widest">Código Gerado!</p>
+                
                 <img id="qrImagem" src="" alt="QR Code" class="w-44 h-44 mx-auto mb-4 rounded-xl shadow-sm border-4 border-white bg-white">
-                <button onclick="copiarPix()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm shadow-lg active:scale-95 transition-transform mb-3">
-                    COPIAR PIX
+                
+                <button onclick="copiarPix()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black text-sm shadow-lg active:scale-95 transition-transform mb-3">
+                    COPIAR PIX COPIA E COLA
                 </button>
-                <p class="text-[10px] text-gray-400 italic animate-pulse">Aguardando confirmação do banco...</p>
+                <p class="text-[10px] text-gray-400 italic">Aguardando confirmação do banco...</p>
             </div>
         </div>
     </div>
@@ -53,11 +57,11 @@
     <div id="telaSucesso" class="hidden bg-white p-12 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border border-green-100">
         <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner">✓</div>
         <h2 class="text-3xl font-black text-gray-800 mb-4">Recebido!</h2>
-        <p class="text-gray-500 mb-8 leading-relaxed">Sua doação foi confirmada com sucesso. Muito obrigado!</p>
+        <p class="text-gray-500 leading-relaxed mb-8">Sua doação foi confirmada com sucesso. Muito obrigado por apoiar!</p>
         <button onclick="location.reload()" class="bg-gray-100 text-gray-500 px-8 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Voltar</button>
     </div>
 
-    <div id="toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-8 py-4 rounded-2xl text-sm font-bold shadow-2xl z-50 toast-animation flex items-center gap-3">
+    <div id="toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-8 py-4 rounded-full text-sm font-bold shadow-2xl z-50 toast-animation flex items-center gap-3">
         <span class="text-green-400 text-lg">✓</span> Código copiado com sucesso!
     </div>
 
@@ -76,7 +80,7 @@
             if (valor >= 5) {
                 btn.disabled = false;
                 btn.innerText = "GERAR CÓDIGO PIX";
-                btn.className = "w-full bg-blue-600 text-white font-extrabold py-5 rounded-2xl shadow-lg transition-all uppercase tracking-widest hover:bg-blue-700 cursor-pointer";
+                btn.className = "w-full bg-green-600 text-white font-extrabold py-5 rounded-2xl shadow-lg transition-all uppercase tracking-widest hover:bg-green-700 cursor-pointer";
             } else {
                 btn.disabled = true;
                 btn.innerText = "MÍNIMO R$ 5,00";
@@ -87,29 +91,35 @@
         async function gerarPix() {
             const valor = document.getElementById('valorInput').value;
             const btn = document.getElementById('btnAcao');
+            
             btn.innerText = "PROCESSANDO...";
             btn.disabled = true;
 
             try {
                 const res = await fetch(`/api/gerar-pix?valor=${valor}`);
                 const data = await res.json();
+
                 if (data.qrCopyPaste) {
                     window.pixCache = data.qrCopyPaste;
                     document.getElementById('qrImagem').src = data.qrCodeUrl;
                     document.getElementById('areaPix').classList.remove('hidden');
                     btn.classList.add('hidden');
+
+                    // Começa a monitorar o status do pagamento
                     monitorarPagamento(data.id);
                 }
             } catch (e) {
-                alert("Erro de conexão.");
+                alert("Erro na conexão. Tente novamente.");
                 validarRegras();
             }
         }
 
         function copiarPix() {
             navigator.clipboard.writeText(window.pixCache);
+            // Mostra o Toast profissional
             const toast = document.getElementById('toast');
             toast.classList.remove('hidden');
+            // Esconde após 3 segundos
             setTimeout(() => { toast.classList.add('hidden'); }, 3000);
         }
 
@@ -123,7 +133,7 @@
                         document.getElementById('cardPrincipal').classList.add('hidden');
                         document.getElementById('telaSucesso').classList.remove('hidden');
                     }
-                } catch (e) { console.log("Consultando..."); }
+                } catch (e) { console.log("Consultando status..."); }
             }, 5000);
         }
     </script>
