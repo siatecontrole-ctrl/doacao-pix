@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
     const { valor, checkId } = req.query;
-    const TOKEN_DOMINIPAY = "colarseutokenaqui"; // COLOQUE SEU TOKEN AQUI
+    const TOKEN_DOMINIPAY = "1fdbb975bf9bfb612871dfa972d9046e45b5b32ea75d91a0"; // COLOQUE SEU TOKEN AQUI
 
     // SE O SITE ESTIVER SÓ CONSULTANDO O STATUS
     if (checkId) {
