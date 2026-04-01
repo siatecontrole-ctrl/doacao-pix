@@ -3,66 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doe Agora</title>
+    <title>Sua Doação Transforma</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f3f4f6; }
+        .loader { border-top-color: #3b82f6; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center">
-        <h1 class="text-2xl font-bold mb-4 text-gray-800">Sua Doação Muda Tudo</h1>
-        
-        <p class="text-sm text-gray-500 mb-6">Insira o valor ou escolha um botão:</p>
-
-        <div class="grid grid-cols-2 gap-2 mb-4">
-            <button onclick="setValor(10)" class="bg-blue-50 py-3 rounded-lg font-bold text-blue-600">R$ 10</button>
-            <button onclick="setValor(50)" class="bg-blue-50 py-3 rounded-lg font-bold text-blue-600">R$ 50</button>
+    <div id="cardDoacao" class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md transition-all border border-gray-100">
+        <div class="text-center mb-8">
+            <div class="w-12 h-1 bg-blue-600 mx-auto mb-4 rounded-full"></div>
+            <h1 class="text-2xl font-extrabold text-gray-800">Fazer uma Doação</h1>
+            <p class="text-gray-500 text-sm mt-1">Escolha um valor para ajudar</p>
         </div>
 
-        <input type="number" id="valorInput" placeholder="0,00" class="w-full p-4 border rounded-xl mb-6 text-center text-xl font-bold">
+        <div class="grid grid-cols-3 gap-3 mb-6">
+            <button onclick="setValor(10)" class="bg-blue-50 hover:bg-blue-100 py-3 rounded-2xl font-bold text-blue-700 transition-all">R$ 10</button>
+            <button onclick="setValor(20)" class="bg-blue-50 hover:bg-blue-100 py-3 rounded-2xl font-bold text-blue-700 transition-all">R$ 20</button>
+            <button onclick="setValor(50)" class="bg-blue-50 hover:bg-blue-100 py-3 rounded-2xl font-bold text-blue-700 transition-all">R$ 50</button>
+        </div>
 
-        <button onclick="gerarPix()" id="btnMain" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg uppercase">
-            Gerar Código PIX
+        <input type="number" id="valorInput" placeholder="Outro valor (mín. R$ 5)" 
+            class="w-full p-4 bg-gray-50 border-none rounded-2xl text-center text-xl font-bold mb-6 focus:ring-2 focus:ring-blue-500 outline-none">
+
+        <button onclick="gerarPix()" id="btnGerar" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-4 rounded-2xl shadow-lg transition-all uppercase tracking-wider">
+            Gerar PIX
         </button>
 
-        <div id="resultado" class="hidden mt-8 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
-            <p class="text-xs text-yellow-700 mb-2 font-bold">CÓDIGO GERADO!</p>
-            <p id="codigoTexto" class="text-[10px] break-all font-mono bg-white p-2 border border-yellow-200 mb-4 h-20 overflow-y-auto"></p>
-            <button onclick="copiar()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold text-sm">COPIAR PIX</button>
+        <div id="areaPix" class="hidden mt-8 text-center animate-in fade-in duration-500">
+            <div class="bg-gray-50 p-6 rounded-3xl border-2 border-dashed border-gray-200">
+                <p class="text-[10px] font-black text-blue-600 uppercase mb-4 tracking-widest">Escaneie o QR Code abaixo</p>
+                
+                <img id="qrImagem" src="" alt="QR Code Pix" class="w-48 h-48 mx-auto mb-4 rounded-lg shadow-sm border bg-white">
+                
+                <button onclick="copiarPix()" class="w-full bg-gray-800 text-white py-3 rounded-xl font-bold text-sm mb-2">
+                    COPIAR CÓDIGO PIX
+                </button>
+                <p class="text-[9px] text-gray-400">Aguardando pagamento... <span id="statusLabel" class="text-blue-500 font-bold">●</span></p>
+            </div>
         </div>
     </div>
 
+    <div id="telaSucesso" class="hidden bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border border-green-100">
+        <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner">✓</div>
+        <h2 class="text-3xl font-black text-gray-800 mb-4">Recebido!</h2>
+        <p class="text-gray-500 leading-relaxed mb-8">Sua doação foi confirmada com sucesso. Muito obrigado por apoiar nossa causa!</p>
+        <button onclick="window.location.reload()" class="bg-gray-100 text-gray-600 px-8 py-3 rounded-xl font-bold text-sm hover:bg-gray-200 transition-all">
+            Voltar ao Início
+        </button>
+    </div>
+
     <script>
+        let paymentId = null;
+        let checkInterval = null;
+
         function setValor(n) { document.getElementById('valorInput').value = n; }
 
         async function gerarPix() {
             const valor = document.getElementById('valorInput').value;
-            if(!valor) return alert("Digite um valor!");
+            if(valor < 5) return alert("O valor mínimo é R$ 5,00 conforme regras da Dominipay.");
 
-            document.getElementById('btnMain').innerText = "PROCESSANDO...";
+            const btn = document.getElementById('btnGerar');
+            btn.innerText = "PROCESSANDO...";
+            btn.disabled = true;
 
             try {
-                // Aqui chamamos o arquivo da pasta API
                 const res = await fetch(`/api/gerar-pix?valor=${valor}`);
                 const data = await res.json();
 
-                if(data.payload) {
-                    document.getElementById('codigoTexto').innerText = data.payload;
-                    document.getElementById('resultado').classList.remove('hidden');
-                    document.getElementById('btnMain').innerText = "GERAR OUTRO";
+                if(data.qrCopyPaste) {
+                    paymentId = data.id; // Guardamos o ID para consultar o status
+                    document.getElementById('qrImagem').src = data.qrCodeUrl;
+                    window.pixCodigo = data.qrCopyPaste;
+                    
+                    document.getElementById('areaPix').classList.remove('hidden');
+                    btn.classList.add('hidden');
+
+                    // Começa a verificar se o usuário pagou
+                    iniciarVerificacao();
                 } else {
-                    alert("Erro ao gerar PIX. Verifique os dados.");
-                    document.getElementById('btnMain').innerText = "TENTAR NOVAMENTE";
+                    alert("Erro ao gerar. Verifique seu token.");
+                    btn.innerText = "TENTAR NOVAMENTE";
+                    btn.disabled = false;
                 }
             } catch (e) {
                 alert("Erro de conexão.");
-                document.getElementById('btnMain').innerText = "ERRO!";
+                btn.disabled = false;
             }
         }
 
-        function copiar() {
-            const texto = document.getElementById('codigoTexto').innerText;
-            navigator.clipboard.writeText(texto);
-            alert("Copiado! Agora cole no seu banco.");
+        function copiarPix() {
+            navigator.clipboard.writeText(window.pixCodigo);
+            alert("Código copiado! Cole no seu banco.");
+        }
+
+        // FUNÇÃO QUE CHECA SE O PAGAMENTO FOI APROVADO
+        function iniciarVerificacao() {
+            checkInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/gerar-pix?checkId=${paymentId}`);
+                    const statusData = await res.json();
+
+                    if(statusData.status === 'approved') {
+                        clearInterval(checkInterval);
+                        document.getElementById('cardDoacao').classList.add('hidden');
+                        document.getElementById('telaSucesso').classList.remove('hidden');
+                        // Toca um som de sucesso (opcional)
+                    }
+                } catch (e) { console.log("Erro ao checar status"); }
+            }, 5000); // Checa a cada 5 segundos
         }
     </script>
 </body>
