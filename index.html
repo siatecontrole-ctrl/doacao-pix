@@ -12,12 +12,12 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <div id="cardPrincipal" class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md border border-gray-100">
+    <div id="cardPrincipal" class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md border border-gray-100 transition-all">
         
         <div class="mb-8 text-center">
             <div class="w-12 h-1.5 bg-blue-600 mx-auto mb-4 rounded-full"></div>
-            <h1 class="text-2xl font-black text-gray-800">Sua Doação Muda Tudo</h1>
-            <p class="text-gray-500 mt-2 text-sm">Valor mínimo para doação: <span class="font-bold text-blue-600 text-base">R$ 5,00</span></p>
+            <h1 class="text-2xl font-black text-gray-800 uppercase tracking-tight">Fazer Doação</h1>
+            <p class="text-gray-400 mt-2 text-sm">O valor mínimo é de <span class="font-bold text-blue-600">R$ 5,00</span></p>
         </div>
 
         <div class="grid grid-cols-2 gap-3 mb-6">
@@ -36,16 +36,14 @@
             Informe o valor
         </button>
 
-        <div id="areaPix" class="hidden mt-8 text-center animate-pulse">
+        <div id="areaPix" class="hidden mt-8 text-center">
             <div class="bg-blue-50 p-6 rounded-3xl border-2 border-dashed border-blue-200">
                 <p class="text-[10px] font-black text-blue-600 uppercase mb-4 tracking-widest">Código Gerado!</p>
-                
                 <img id="qrImagem" src="" alt="QR Code" class="w-44 h-44 mx-auto mb-4 rounded-xl shadow-sm border-4 border-white bg-white">
-                
                 <button onclick="copiarPix()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-sm shadow-lg active:scale-95 transition-transform mb-3">
-                    COPIAR PIX COPIA E COLA
+                    COPIAR PIX
                 </button>
-                <p class="text-[10px] text-gray-400 italic">Aguardando confirmação do pagamento...</p>
+                <p class="text-[10px] text-gray-400 italic animate-pulse">Aguardando confirmação do banco...</p>
             </div>
         </div>
     </div>
@@ -53,20 +51,19 @@
     <div id="telaSucesso" class="hidden bg-white p-12 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border border-green-100">
         <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner">✓</div>
         <h2 class="text-3xl font-black text-gray-800 mb-4">Recebido!</h2>
-        <p class="text-gray-500 mb-8 leading-relaxed">Sua doação foi confirmada. Muito obrigado por apoiar este projeto!</p>
+        <p class="text-gray-500 mb-8 leading-relaxed">Sua doação foi confirmada com sucesso.</p>
         <button onclick="location.reload()" class="bg-gray-100 text-gray-500 px-8 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Voltar</button>
     </div>
 
     <script>
         let checkStatusInterval = null;
 
-        // Atalhos de valor
         function setValor(n) {
             document.getElementById('valorInput').value = n;
             validarRegras();
         }
 
-        // Função "Sentinela": Só libera o botão se o valor for >= 5
+        // Bloqueia o botão se o valor for menor que 5
         function validarRegras() {
             const valor = parseFloat(document.getElementById('valorInput').value);
             const btn = document.getElementById('btnAcao');
@@ -77,7 +74,7 @@
                 btn.className = "w-full bg-blue-600 text-white font-extrabold py-5 rounded-2xl shadow-lg transition-all uppercase tracking-widest hover:bg-blue-700 cursor-pointer";
             } else {
                 btn.disabled = true;
-                btn.innerText = "VALOR MÍNIMO R$ 5,00";
+                btn.innerText = "MÍNIMO R$ 5,00";
                 btn.className = "w-full bg-gray-200 text-gray-400 font-extrabold py-5 rounded-2xl transition-all uppercase tracking-widest cursor-not-allowed";
             }
         }
@@ -98,19 +95,20 @@
                     document.getElementById('qrImagem').src = data.qrCodeUrl;
                     document.getElementById('areaPix').classList.remove('hidden');
                     btn.classList.add('hidden');
-
-                    // Começa a monitorar o status do pagamento
                     monitorarPagamento(data.id);
+                } else {
+                    alert("Erro ao gerar. Verifique os dados.");
+                    validarRegras();
                 }
             } catch (e) {
-                alert("Erro na conexão. Tente novamente.");
+                alert("Erro de conexão.");
                 validarRegras();
             }
         }
 
         function copiarPix() {
             navigator.clipboard.writeText(window.pixCache);
-            alert("Código Pix Copiado!");
+            alert("Copiado! Agora cole no seu banco.");
         }
 
         function monitorarPagamento(id) {
@@ -118,15 +116,13 @@
                 try {
                     const res = await fetch(`/api/gerar-pix?checkId=${id}`);
                     const statusData = await res.json();
-
-                    // Se o status mudar para 'approved', o site reage na hora
                     if (statusData.status === 'approved') {
                         clearInterval(checkStatusInterval);
                         document.getElementById('cardPrincipal').classList.add('hidden');
                         document.getElementById('telaSucesso').classList.remove('hidden');
                     }
-                } catch (e) { console.log("Verificando status..."); }
-            }, 5000); // Consulta a cada 5 segundos
+                } catch (e) { console.log("Verificando..."); }
+            }, 5000);
         }
     </script>
 </body>
