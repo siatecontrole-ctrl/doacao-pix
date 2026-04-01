@@ -2,7 +2,7 @@ export default async function handler(req, res) {
     const { valor } = req.query;
 
     // Procure a linha abaixo e cole seu código dentro das aspas
-    const TOKEN_DOMINIPAY = "1fdbb975bf9bfb612871dfa972d9046e45b5b32ea75d91a0"; 
+    const TOKEN_DOMINIPAY = "62859ded0572f72cbd5f70cc2f85a9f5a89f46f446bc48607883f959f96d6e0d"; 
 
     if (!valor) {
         return res.status(400).json({ error: "Valor não informado" });
