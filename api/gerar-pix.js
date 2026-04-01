@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
     const { valor } = req.query;
 
-    // Procure a linha abaixo e cole seu código dentro das aspas
+    // LEMBRE-SE DE COLAR SEU TOKEN REAL AQUI DENTRO DAS ASPAS
     const TOKEN_DOMINIPAY = "1fdbb975bf9bfb612871dfa972d9046e45b5b32ea75d91a0"; 
 
     if (!valor) {
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 amount: parseFloat(valor),
                 email: "doador@contato.com",
-                observation: "Doação via Site",
+                observation: "Doacao via Site",
                 webhookUrl: "https://seusite.com/api/webhook"
             })
         });
@@ -26,9 +26,9 @@ export default async function handler(req, res) {
         const dados = await response.json();
 
         if (response.ok) {
-            // A API deles retorna o código PIX no campo 'copyAndPaste'
+            // O nome correto segundo a sua doc é 'qrCopyPaste'
             return res.status(200).json({ 
-                payload: dados.copyAndPaste || dados.qrCode || dados.pixCode 
+                payload: dados.qrCopyPaste 
             });
         } else {
             return res.status(400).json({ error: "Erro na Dominipay", detalhes: dados });
