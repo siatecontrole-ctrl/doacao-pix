@@ -1,13 +1,19 @@
 export default async function handler(req, res) {
-    const { valor } = req.query;
+    const { valor, checkId } = req.query;
+    const TOKEN_DOMINIPAY = "colarseutokenaqui"; // COLOQUE SEU TOKEN AQUI
 
-    // LEMBRE-SE DE COLAR SEU TOKEN REAL AQUI DENTRO DAS ASPAS
-    const TOKEN_DOMINIPAY = "1fdbb975bf9bfb612871dfa972d9046e45b5b32ea75d91a0"; 
-
-    if (!valor) {
-        return res.status(400).json({ error: "Valor não informado" });
+    // SE O SITE ESTIVER SÓ CONSULTANDO O STATUS
+    if (checkId) {
+        try {
+            const response = await fetch(`https://public-api-prod.dominipay.com.br/api-public/payments/${checkId}`, {
+                headers: { "Authorization": `Bearer ${TOKEN_DOMINIPAY}` }
+            });
+            const status = await response.json();
+            return res.status(200).json(status);
+        } catch (e) { return res.status(500).json({ error: "Erro na consulta" }); }
     }
 
+    // SE O SITE ESTIVER CRIANDO UM PIX NOVO
     try {
         const response = await fetch("https://public-api-prod.dominipay.com.br/api-public/payments", {
             method: "POST",
@@ -18,23 +24,14 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 amount: parseFloat(valor),
                 email: "doador@contato.com",
-                observation: "Doacao via Site",
-                webhookUrl: "https://seusite.com/api/webhook"
+                observation: "Doacao via Site"
             })
         });
 
         const dados = await response.json();
-
-        if (response.ok) {
-            // O nome correto segundo a sua doc é 'qrCopyPaste'
-            return res.status(200).json({ 
-                payload: dados.qrCopyPaste 
-            });
-        } else {
-            return res.status(400).json({ error: "Erro na Dominipay", detalhes: dados });
-        }
+        return res.status(response.ok ? 200 : 400).json(dados);
 
     } catch (error) {
-        return res.status(500).json({ error: "Erro de conexão" });
+        return res.status(500).json({ error: "Erro de rede" });
     }
 }
