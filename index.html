@@ -1,153 +1,19 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sua Doação Transforma</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; overflow-x: hidden; }
+<div id="areaPix" class="hidden mt-6 text-center">
+    <div class="bg-green-50 p-4 rounded-3xl border-2 border-dashed border-green-200">
+        <p class="text-[10px] font-black text-green-700 uppercase mb-3 tracking-widest">Código Gerado!</p>
         
-        .btn-valor {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid transparent;
-        }
-
-        .btn-active {
-            background-color: #dcfce7 !important;
-            border-color: #16a34a !important;
-            color: #14532d !important;
-            transform: scale(1.08);
-            font-weight: 800;
-            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.1);
-        }
-
-        .toast-animation { animation: slideUp 0.3s ease-out forwards; }
-        @keyframes slideUp { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
-    </style>
-</head>
-<body class="min-h-screen flex items-center justify-center p-4">
-
-    <div id="cardPrincipal" class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md border border-gray-100 relative z-10">
-        
-        <div class="mb-8 text-center">
-            <div class="w-12 h-1.5 bg-green-600 mx-auto mb-4 rounded-full"></div>
-            <h1 class="text-2xl font-black text-gray-800 uppercase tracking-tight">Fazer Doação</h1>
-            <p class="text-gray-400 mt-2 text-sm">Escolha um valor sugerido:</p>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3 mb-8 items-center">
-            <button onclick="selecionarValor(10, this)" class="btn-valor bg-green-50 py-4 rounded-2xl font-bold text-green-700">R$ 10</button>
-            <button onclick="selecionarValor(15, this)" id="btnSugestao" class="btn-valor btn-active bg-green-50 py-4 rounded-2xl font-bold text-green-700">R$ 15</button>
-            <button onclick="selecionarValor(30, this)" class="btn-valor bg-green-50 py-4 rounded-2xl font-bold text-green-700">R$ 30</button>
-        </div>
-
-        <p class="text-gray-400 text-xs font-semibold mb-2 ml-1">Ou altere o valor abaixo:</p>
-        
-        <div class="relative mb-6">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">R$</span>
-            <input type="number" id="valorInput" oninput="validarManual()" placeholder="Outro valor" 
-                class="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-xl font-extrabold focus:border-green-500 focus:bg-white outline-none transition-all">
-        </div>
-
-        <button onclick="gerarPix()" id="btnAcao" 
-            class="w-full bg-green-600 text-white font-extrabold py-5 rounded-2xl shadow-lg transition-all uppercase tracking-widest hover:bg-green-700">
-            GERAR CÓDIGO PIX
+        <button onclick="copiarPix()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black text-sm shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+            </svg>
+            COPIAR PIX AUTOMÁTICO
         </button>
 
-        <div id="areaPix" class="hidden mt-8 text-center">
-            <div class="bg-green-50 p-6 rounded-3xl border-2 border-dashed border-green-200">
-                <img id="qrImagem" src="" alt="QR Code" class="w-44 h-44 mx-auto mb-4 rounded-xl border-4 border-white bg-white">
-                <div class="bg-white p-3 rounded-xl border border-green-100 mb-4 text-left">
-                    <p id="codigoTextoVisible" class="text-[10px] break-all font-mono text-gray-600"></p>
-                </div>
-                <button onclick="copiarPix()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black text-sm shadow-lg active:scale-95 transition-transform">
-                    COPIAR PIX AUTOMÁTICO
-                </button>
-            </div>
+        <img id="qrImagem" src="" alt="QR Code" class="w-40 h-40 mx-auto mb-4 rounded-xl border-4 border-white bg-white shadow-sm">
+        
+        <div class="bg-white p-3 rounded-xl border border-green-100 text-left">
+            <p id="codigoTextoVisible" class="text-[9px] break-all font-mono text-gray-500 leading-tight"></p>
         </div>
     </div>
-
-    <div id="telaSucesso" class="hidden bg-white p-12 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border border-green-100">
-        <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">✓</div>
-        <h2 class="text-3xl font-black text-gray-800 mb-4">Recebido!</h2>
-        <button onclick="location.reload()" class="bg-gray-100 text-gray-500 px-8 py-3 rounded-xl font-bold">Voltar</button>
-    </div>
-
-    <div id="toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-8 py-4 rounded-full text-sm font-bold z-50 toast-animation">
-        ✓ Código copiado com sucesso!
-    </div>
-
-    <script>
-        window.onload = () => { document.getElementById('valorInput').value = 15; };
-
-        function selecionarValor(valor, elemento) {
-            document.getElementById('valorInput').value = valor;
-            document.querySelectorAll('.btn-valor').forEach(btn => btn.classList.remove('btn-active'));
-            elemento.classList.add('btn-active');
-            validarManual();
-        }
-
-        function validarManual() {
-            const valor = parseFloat(document.getElementById('valorInput').value);
-            const btn = document.getElementById('btnAcao');
-            const valoresFixos = [10, 15, 30];
-            
-            if (!valoresFixos.includes(valor)) {
-                document.querySelectorAll('.btn-valor').forEach(btn => btn.classList.remove('btn-active'));
-            }
-
-            if (valor >= 5) {
-                btn.disabled = false;
-                btn.innerText = "GERAR CÓDIGO PIX";
-                btn.className = "w-full bg-green-600 text-white font-extrabold py-5 rounded-2xl shadow-lg transition-all uppercase tracking-widest hover:bg-green-700 cursor-pointer";
-            } else {
-                btn.disabled = true;
-                btn.innerText = "MÍNIMO R$ 5,00";
-                btn.className = "w-full bg-gray-200 text-gray-400 font-extrabold py-5 rounded-2xl transition-all uppercase tracking-widest cursor-not-allowed";
-            }
-        }
-
-        async function gerarPix() {
-            const valor = document.getElementById('valorInput').value;
-            const btn = document.getElementById('btnAcao');
-            btn.innerText = "PROCESSANDO...";
-            btn.disabled = true;
-
-            try {
-                const res = await fetch(`/api/gerar-pix?valor=${valor}`);
-                const data = await res.json();
-                if (data.qrCopyPaste) {
-                    window.pixCache = data.qrCopyPaste;
-                    document.getElementById('codigoTextoVisible').innerText = data.qrCopyPaste;
-                    document.getElementById('qrImagem').src = data.qrCodeUrl;
-                    document.getElementById('areaPix').classList.remove('hidden');
-                    btn.classList.add('hidden');
-                    monitorarPagamento(data.id);
-                }
-            } catch (e) { alert("Erro de conexão."); validarManual(); }
-        }
-
-        function copiarPix() {
-            navigator.clipboard.writeText(window.pixCache);
-            const t = document.getElementById('toast');
-            t.classList.remove('hidden');
-            setTimeout(() => t.classList.add('hidden'), 3000);
-        }
-
-        function monitorarPagamento(id) {
-            setInterval(async () => {
-                try {
-                    const res = await fetch(`/api/gerar-pix?checkId=${id}`);
-                    const d = await res.json();
-                    if (d.status === 'approved') {
-                        document.getElementById('cardPrincipal').classList.add('hidden');
-                        document.getElementById('telaSucesso').classList.remove('hidden');
-                    }
-                } catch (e) {}
-            }, 5000);
-        }
-    </script>
-</body>
-</html>
+</div>
