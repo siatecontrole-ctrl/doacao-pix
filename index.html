@@ -9,17 +9,15 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; overflow-x: hidden; }
         
-        /* Estilo base do botão */
         .btn-valor {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 2px solid transparent;
         }
 
-        /* Classe de destaque dinâmico */
         .btn-active {
-            background-color: #dcfce7 !important; /* green-100 */
-            border-color: #16a34a !important;     /* green-600 */
-            color: #14532d !important;            /* green-900 */
+            background-color: #dcfce7 !important;
+            border-color: #16a34a !important;
+            color: #14532d !important;
             transform: scale(1.08);
             font-weight: 800;
             box-shadow: 0 4px 12px rgba(22, 163, 74, 0.1);
@@ -45,6 +43,8 @@
             <button onclick="selecionarValor(30, this)" class="btn-valor bg-green-50 py-4 rounded-2xl font-bold text-green-700">R$ 30</button>
         </div>
 
+        <p class="text-gray-400 text-xs font-semibold mb-2 ml-1">Ou altere o valor abaixo:</p>
+        
         <div class="relative mb-6">
             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">R$</span>
             <input type="number" id="valorInput" oninput="validarManual()" placeholder="Outro valor" 
@@ -80,19 +80,11 @@
     </div>
 
     <script>
-        // Define o valor inicial de R$ 15 no input invisivelmente
         window.onload = () => { document.getElementById('valorInput').value = 15; };
 
         function selecionarValor(valor, elemento) {
-            // 1. Atualiza o input
             document.getElementById('valorInput').value = valor;
-            
-            // 2. Remove o destaque de todos os botões
-            document.querySelectorAll('.btn-valor').forEach(btn => {
-                btn.classList.remove('btn-active');
-            });
-            
-            // 3. Adiciona destaque apenas ao clicado
+            document.querySelectorAll('.btn-valor').forEach(btn => btn.classList.remove('btn-active'));
             elemento.classList.add('btn-active');
             validarManual();
         }
@@ -100,9 +92,8 @@
         function validarManual() {
             const valor = parseFloat(document.getElementById('valorInput').value);
             const btn = document.getElementById('btnAcao');
-            
-            // Se o usuário digitar algo diferente dos botões, remove o realce deles
             const valoresFixos = [10, 15, 30];
+            
             if (!valoresFixos.includes(valor)) {
                 document.querySelectorAll('.btn-valor').forEach(btn => btn.classList.remove('btn-active'));
             }
