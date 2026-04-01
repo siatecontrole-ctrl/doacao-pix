@@ -9,24 +9,21 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; overflow-x: hidden; }
         
-        /* REMOÇÃO FORÇADA E TOTAL DE QUALQUER CLIPE DE PAPEL/ÍCONE ESTRANHO */
-        body img, body div, body span, body figure, body a { 
-            background-image: none !important; 
-        }
-        img[src*="clippy"] { 
+        /* COMANDO DE EXTERMÍNIO DO CLIPE */
+        /* Remove qualquer imagem, objeto ou div que tente flutuar na tela */
+        img[src*="clippy"], [class*="widget"], [id*="widget"], iframe { 
             display: none !important; 
             visibility: hidden !important; 
-            opacity: 0 !important; 
+            pointer-events: none !important;
         }
-        
-        /* Animação do Toast */
+
         .toast-animation { animation: slideUp 0.3s ease-out forwards; }
         @keyframes slideUp { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <div id="cardPrincipal" class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md border border-gray-100 transition-all">
+    <div id="cardPrincipal" class="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md border border-gray-100 transition-all relative z-10">
         
         <div class="mb-8 text-center">
             <div class="w-12 h-1.5 bg-green-600 mx-auto mb-4 rounded-full"></div>
@@ -50,52 +47,45 @@
             Informe o valor
         </button>
 
-        <div id="areaPix" class="hidden mt-8 text-center animate-pulse">
+        <div id="areaPix" class="hidden mt-8 text-center">
             <div class="bg-green-50 p-6 rounded-3xl border-2 border-dashed border-green-200">
                 <p class="text-[10px] font-black text-green-700 uppercase mb-4 tracking-widest">Código Gerado!</p>
                 
                 <img id="qrImagem" src="" alt="QR Code" class="w-44 h-44 mx-auto mb-4 rounded-xl shadow-sm border-4 border-white bg-white">
                 
-                <div class="bg-white p-3 rounded-xl border border-green-100 mb-4 h-20 overflow-y-auto">
-                    <p id="codigoTextoVisible" class="text-[9px] break-all font-mono text-gray-500 leading-tight text-left"></p>
+                <div class="bg-white p-3 rounded-xl border border-green-100 mb-4 text-left">
+                    <p class="text-[8px] uppercase font-bold text-gray-400 mb-1">Copia e Cola Manual:</p>
+                    <p id="codigoTextoVisible" class="text-[10px] break-all font-mono text-gray-600 leading-tight"></p>
                 </div>
 
-                <button onclick="copiarPix()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black text-sm shadow-lg active:scale-95 transition-transform mb-3 flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                <button onclick="copiarPix()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black text-sm shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
                     COPIAR PIX AUTOMÁTICO
                 </button>
-                <p class="text-[10px] text-gray-400 italic">Aguardando confirmação do banco...</p>
             </div>
         </div>
     </div>
 
-    <div id="telaSucesso" class="hidden bg-white p-12 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border border-green-100">
+    <div id="telaSucesso" class="hidden bg-white p-12 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border border-green-100 relative z-10">
         <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner">✓</div>
         <h2 class="text-3xl font-black text-gray-800 mb-4">Recebido!</h2>
-        <p class="text-gray-500 leading-relaxed mb-8">Sua doação foi confirmada com sucesso. Muito obrigado por apoiar!</p>
-        <button onclick="location.reload()" class="bg-gray-100 text-gray-500 px-8 py-3 rounded-xl font-bold text-sm hover:bg-gray-200">Voltar</button>
+        <p class="text-gray-500 mb-8">Sua doação foi confirmada com sucesso.</p>
+        <button onclick="location.reload()" class="bg-gray-100 text-gray-500 px-8 py-3 rounded-xl font-bold text-sm">Voltar</button>
     </div>
 
-    <div id="toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-8 py-4 rounded-full text-sm font-bold shadow-2xl z-50 toast-animation flex items-center gap-3">
-        <span class="text-green-400 text-lg">✓</span> Código copiado com sucesso!
+    <div id="toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-8 py-4 rounded-full text-sm font-bold shadow-2xl z-50 toast-animation">
+        ✓ Código copiado com sucesso!
     </div>
 
     <script>
-        let checkStatusInterval = null;
-
-        function setValor(n) {
-            document.getElementById('valorInput').value = n;
-            validarRegras();
-        }
+        function setValor(n) { document.getElementById('valorInput').value = n; validarRegras(); }
 
         function validarRegras() {
             const valor = parseFloat(document.getElementById('valorInput').value);
             const btn = document.getElementById('btnAcao');
-            
             if (valor >= 5) {
                 btn.disabled = false;
                 btn.innerText = "GERAR CÓDIGO PIX";
-                btn.className = "w-full bg-green-600 text-white font-extrabold py-5 rounded-2xl shadow-lg transition-all uppercase tracking-widest hover:bg-green-700 cursor-pointer";
+                btn.className = "w-full bg-green-600 text-white font-extrabold py-5 rounded-2xl shadow-lg transition-all uppercase tracking-widest cursor-pointer";
             } else {
                 btn.disabled = true;
                 btn.innerText = "MÍNIMO R$ 5,00";
@@ -106,54 +96,41 @@
         async function gerarPix() {
             const valor = document.getElementById('valorInput').value;
             const btn = document.getElementById('btnAcao');
-            
             btn.innerText = "PROCESSANDO...";
             btn.disabled = true;
 
             try {
                 const res = await fetch(`/api/gerar-pix?valor=${valor}`);
                 const data = await res.json();
-
                 if (data.qrCopyPaste) {
-                    // Armazena o código e exibe-o no campo visível
                     window.pixCache = data.qrCopyPaste;
                     document.getElementById('codigoTextoVisible').innerText = data.qrCopyPaste;
-                    
-                    // Exibe o QR Code e a área do Pix
                     document.getElementById('qrImagem').src = data.qrCodeUrl;
                     document.getElementById('areaPix').classList.remove('hidden');
                     btn.classList.add('hidden');
-
-                    // Começa a monitorar o status do pagamento
                     monitorarPagamento(data.id);
                 }
-            } catch (e) {
-                alert("Erro na conexão. Tente novamente.");
-                validarRegras();
-            }
+            } catch (e) { alert("Erro de conexão."); validarRegras(); }
         }
 
         function copiarPix() {
             navigator.clipboard.writeText(window.pixCache);
-            // Mostra o Toast profissional
-            const toast = document.getElementById('toast');
-            toast.classList.remove('hidden');
-            // Esconde após 3 segundos
-            setTimeout(() => { toast.classList.add('hidden'); }, 3000);
+            const t = document.getElementById('toast');
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 3000);
         }
 
         function monitorarPagamento(id) {
-            checkStatusInterval = setInterval(async () => {
+            setInterval(async () => {
                 try {
                     const res = await fetch(`/api/gerar-pix?checkId=${id}`);
-                    const statusData = await res.json();
-                    if (statusData.status === 'approved') {
-                        clearInterval(checkStatusInterval);
+                    const d = await res.json();
+                    if (d.status === 'approved') {
                         document.getElementById('cardPrincipal').classList.add('hidden');
                         document.getElementById('telaSucesso').classList.remove('hidden');
                     }
-                } catch (e) { console.log("Consultando status..."); }
-            }, 5000); // Consulta a cada 5 segundos
+                } catch (e) {}
+            }, 5000);
         }
     </script>
 </body>
