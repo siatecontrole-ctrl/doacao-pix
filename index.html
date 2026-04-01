@@ -3,56 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doação PIX - Causa Única</title>
+    <title>Doe Agora</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
     <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center">
-        <h1 class="text-2xl font-bold text-gray-800 mb-2">Ajude Nossa Causa</h1>
-        <p class="text-gray-500 mb-6 text-sm">Escolha o valor da sua contribuição via PIX</p>
+        <h1 class="text-2xl font-bold mb-4 text-gray-800">Sua Doação Muda Tudo</h1>
+        
+        <p class="text-sm text-gray-500 mb-6">Insira o valor ou escolha um botão:</p>
 
-        <div class="grid grid-cols-2 gap-3 mb-6">
-            <button onclick="definirValor(10)" class="border-2 border-green-500 py-3 rounded-xl font-bold text-green-600 hover:bg-green-50 transition">R$ 10</button>
-            <button onclick="definirValor(50)" class="border-2 border-green-500 py-3 rounded-xl font-bold text-green-600 hover:bg-green-50 transition">R$ 50</button>
+        <div class="grid grid-cols-2 gap-2 mb-4">
+            <button onclick="setValor(10)" class="bg-blue-50 py-3 rounded-lg font-bold text-blue-600">R$ 10</button>
+            <button onclick="setValor(50)" class="bg-blue-50 py-3 rounded-lg font-bold text-blue-600">R$ 50</button>
         </div>
 
-        <input type="number" id="valorInput" placeholder="Outro valor (R$)" 
-               class="w-full p-4 border rounded-xl mb-6 text-center outline-none focus:ring-2 focus:ring-green-400">
+        <input type="number" id="valorInput" placeholder="0,00" class="w-full p-4 border rounded-xl mb-6 text-center text-xl font-bold">
 
-        <button onclick="solicitarPix()" id="btnGerar"
-                class="w-full bg-green-500 text-white font-black py-4 rounded-xl shadow-lg hover:bg-green-600 transition uppercase">
-            Gerar PIX
+        <button onclick="gerarPix()" id="btnMain" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg uppercase">
+            Gerar Código PIX
         </button>
 
-        <div id="resultado" class="hidden mt-8 p-4 bg-gray-100 rounded-2xl border-dashed border-2 border-gray-300">
-            <p class="text-xs text-gray-400 mb-2">Pague com o código abaixo:</p>
-            <p id="codigoPix" class="text-[10px] break-all font-mono bg-white p-2 border mb-3">00020126... (Gerando...)</p>
-            <button onclick="copiar()" class="text-blue-600 font-bold text-sm underline">Copiar Código PIX</button>
+        <div id="resultado" class="hidden mt-8 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+            <p class="text-xs text-yellow-700 mb-2 font-bold">CÓDIGO GERADO!</p>
+            <p id="codigoTexto" class="text-[10px] break-all font-mono bg-white p-2 border border-yellow-200 mb-4 h-20 overflow-y-auto"></p>
+            <button onclick="copiar()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold text-sm">COPIAR PIX</button>
         </div>
     </div>
 
     <script>
-        function definirValor(v) {
-            document.getElementById('valorInput').value = v;
-        }
+        function setValor(n) { document.getElementById('valorInput').value = n; }
 
-        function solicitarPix() {
+        async function gerarPix() {
             const valor = document.getElementById('valorInput').value;
-            if(!valor || valor <= 0) return alert("Por favor, insira um valor.");
-            
-            document.getElementById('btnGerar').innerText = "Processando...";
-            // Por enquanto é um simulador. No próximo passo conectamos a Dominipay.
-            setTimeout(() => {
-                document.getElementById('resultado').classList.remove('hidden');
-                document.getElementById('btnGerar').innerText = "Gerar Novo PIX";
-            }, 1000);
+            if(!valor) return alert("Digite um valor!");
+
+            document.getElementById('btnMain').innerText = "PROCESSANDO...";
+
+            try {
+                // Aqui chamamos o arquivo da pasta API
+                const res = await fetch(`/api/gerar-pix?valor=${valor}`);
+                const data = await res.json();
+
+                if(data.payload) {
+                    document.getElementById('codigoTexto').innerText = data.payload;
+                    document.getElementById('resultado').classList.remove('hidden');
+                    document.getElementById('btnMain').innerText = "GERAR OUTRO";
+                } else {
+                    alert("Erro ao gerar PIX. Verifique os dados.");
+                    document.getElementById('btnMain').innerText = "TENTAR NOVAMENTE";
+                }
+            } catch (e) {
+                alert("Erro de conexão.");
+                document.getElementById('btnMain').innerText = "ERRO!";
+            }
         }
 
         function copiar() {
-            const texto = document.getElementById('codigoPix').innerText;
+            const texto = document.getElementById('codigoTexto').innerText;
             navigator.clipboard.writeText(texto);
-            alert("Copiado! Agora cole no app do seu banco.");
+            alert("Copiado! Agora cole no seu banco.");
         }
     </script>
 </body>
