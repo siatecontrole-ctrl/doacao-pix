@@ -1,8 +1,7 @@
 export default async function handler(req, res) {
-    // Pegamos o valor que o usuário digitou (ex: ?valor=10)
     const { valor } = req.query;
 
-    // COLOQUE SUA CHAVE AQUI (dentro das aspas)
+    // Procure a linha abaixo e cole seu código dentro das aspas
     const TOKEN_DOMINIPAY = "1fdbb975bf9bfb612871dfa972d9046e45b5b32ea75d91a0"; 
 
     if (!valor) {
@@ -10,31 +9,32 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Chamada real para a API da Dominipay
-        const response = await fetch("https://api.dominipay.com.br/v1/pix/immediate-charge", {
+        const response = await fetch("https://public-api-prod.dominipay.com.br/api-public/payments", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${TOKEN_DOMINIPAY}`,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                value: parseFloat(valor), // Garante que o valor seja um número
-                description: "Doação Causa Única"
+                amount: parseFloat(valor),
+                email: "doador@contato.com",
+                observation: "Doação via Site",
+                webhookUrl: "https://seusite.com/api/webhook"
             })
         });
 
         const dados = await response.json();
 
         if (response.ok) {
-            // Enviamos para o seu site o código Copia e Cola
+            // A API deles retorna o código PIX no campo 'copyAndPaste'
             return res.status(200).json({ 
-                payload: dados.pix_code 
+                payload: dados.copyAndPaste || dados.qrCode || dados.pixCode 
             });
         } else {
             return res.status(400).json({ error: "Erro na Dominipay", detalhes: dados });
         }
 
     } catch (error) {
-        return res.status(500).json({ error: "Erro de conexão com o servidor" });
+        return res.status(500).json({ error: "Erro de conexão" });
     }
 }
